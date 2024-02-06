@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highcharts Interface</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <style>
+        /* Agrega estilos CSS según tus preferencias */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .chart-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Line Chart with Data Levels -->
+<div class="chart-container" id="lineChart1"></div>
+
+<!-- Line Chart with AJAX Loaded Data, Clickable Points -->
+<div class="chart-container" id="lineChart2"></div>
+
+<!-- Gauge Series - Amperaje -->
+<div class="chart-container" id="gaugeAmperaje"></div>
+
+<!-- Gauge Series - Voltaje -->
+<div class="chart-container" id="gaugeVoltaje"></div>
+
+<!-- Botones de Encender y Apagar -->
+<div>
+    <button onclick="encender()">Encender</button>
+    <button onclick="apagar()">Apagar</button>
+</div>
+
+<script>
+    // Función para generar datos aleatorios
+    function generateRandomData() {
+        return Math.floor(Math.random() * 100);
+    }
+
+    // Funciones para encender y apagar
+    function encender() {
+        updateCharts(true);
+    }
+
+    function apagar() {
+        updateCharts(false);
+    }
+
+    // Función para actualizar los gráficos con valores aleatorios
+    function updateCharts(estado) {
+        // Actualizar los valores de los gráficos con nuevos datos aleatorios
+        var lineChart1 = Highcharts.charts[0];
+        var lineChart2 = Highcharts.charts[1];
+        var gaugeAmperaje = Highcharts.charts[2];
+        var gaugeVoltaje = Highcharts.charts[3];
+
+        lineChart1.series[0].setData([generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData()]);
+        lineChart2.series[0].setData([generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData()]);
+
+        gaugeAmperaje.series[0].setData([generateRandomData()]);
+        gaugeVoltaje.series[0].setData([generateRandomData()]);
+
+        // Mostrar mensaje según el estado (encendido o apagado)
+        var mensaje = estado ? 'Encendido' : 'Apagado';
+        alert('Sistema ' + mensaje);
+    }
+
+    // Line Chart with Data Levels
+    Highcharts.chart('lineChart1', {
+        title: {
+            text: 'Line Chart with Data Levels'
+        },
+        series: [{
+            name: 'Data Levels',
+            data: [generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData(), generateRandomData()]
+        }]
+    });
+
+    // Line Chart with AJAX Loaded Data, Clickable Points
+    Highcharts.chart('lineChart2', {
+        chart: {
+            events: {
+                load: function() {
+                    // Simular carga de datos AJAX
+                    var chart = this;
+                    $.get('tu_archivo_de_datos.json', function(data) {
+                        chart.series[0].setData(data);
+                    });
+                }
+            }
+        },
+        title: {
+            text: 'Line Chart - AJAX Loaded Data, Clickable Points'
+        },
+        series: [{
+            name: 'Data from AJAX',
+            data: [] // Los datos se cargarán dinámicamente
+        }],
+        plotOptions: {
+            series: {
+                point: {
+                    events: {
+                        click: function() {
+                            alert('Valor: ' + this.y);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gauge Series - Amperaje
+    Highcharts.chart('gaugeAmperaje', {
+        chart: {
+            type: 'gauge',
+            plotBackgroundColor: null,
+            plotBackgroundImage: null,
+            plotBorderWidth: 0,
+            plotShadow: false
+        },
+        title: {
+            text: 'Amperaje'
+        },
+        pane: {
+            startAngle: -150,
+            endAngle: 150,
+            background: [{
+                backgroundColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#FFF'],
+                        [1, '#333']
+                    ]
+                },
+                borderWidth: 0,
+                outerRadius: '109%'
+            }, {
+                backgroundColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#333'],
+                        [1, '#FFF']
+                    ]
+                },
+                borderWidth: 1,
+                outerRadius: '107%'
+            }, {
+                // default background
+            }, {
+                backgroundColor: '#DDD',
+                borderWidth: 0,
+                outerRadius: '105%',
+                innerRadius: '103%'
+            }]
+        },
+        yAxis: {
+            min: 0,
+            max: 100,
+            minorTickInterval: 'auto',
+            minorTickWidth: 1,
+            minorTickLength: 10,
+            minorTickPosition: 'inside',
+            minorTickColor: '#666',
+            tickPixelInterval: 30,
+            tickWidth: 2,
+            tickPosition: 'inside',
+            tickLength: 10,
+            tickColor: '#666',
+            labels: {
+                step: 2,
+                rotation: 'auto'
+            },
+            title: {
+                text: '%'
+            },
+            plotBands: [{
+                from: 0,
+                to: 60,
+                color: '#55BF3B' // green
+            }, {
+                from: 60,
+                to: 80,
+                color: '#DDDF0D' // yellow
+            }, {
+                from: 80,
+                to: 100,
+                color: '#DF5353' // red
+            }]
+        },
+        series: [{
+            name: 'Amperaje',
+            data: [generateRandomData()],
+            tooltip: {
+                valueSuffix: ' %'
+            }
+        }]
+    });
+
+    // Gauge Series - Voltaje
+    Highcharts.chart('gaugeVoltaje', {
+        chart: {
+            type: 'gauge',
+            plotBackgroundColor: null,
+            plotBackgroundImage: null,
+            plotBorderWidth: 0,
+            plotShadow: false
+        },
+        title: {
+            text: 'Voltaje'
+        },
+        pane: {
+            startAngle:
+			-150,
+            endAngle: 150,
+            background: [{
+                backgroundColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#FFF'],
+                        [1, '#333']
+                    ]
+                },
+                borderWidth: 0,
+                outerRadius: '109%'
+            }, {
+                backgroundColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#333'],
+                        [1, '#FFF']
+                    ]
+                },
+                borderWidth: 1,
+                outerRadius: '107%'
+            }, {
+                // default background
+            }, {
+                backgroundColor: '#DDD',
+                borderWidth: 0,
+                outerRadius: '105%',
+                innerRadius: '103%'
+            }]
+        },
+        yAxis: {
+            min: 0,
+            max: 100,
+            minorTickInterval: 'auto',
+            minorTickWidth: 1,
+            minorTickLength: 10,
+            minorTickPosition: 'inside',
+            minorTickColor: '#666',
+            tickPixelInterval: 30,
+            tickWidth: 2,
+            tickPosition: 'inside',
+            tickLength: 10,
+            tickColor: '#666',
+            labels: {
+                step: 2,
+                rotation: 'auto'
+            },
+            title: {
+                text: '%'
+            },
+            plotBands: [{
+                from: 0,
+                to: 60,
+                color: '#55BF3B' // green
+            }, {
+                from: 60,
+                to: 80,
+                color: '#DDDF0D' // yellow
+            }, {
+                from: 80,
+                to: 100,
+                color: '#DF5353' // red
+            }]
+        },
+        series: [{
+            name: 'Voltaje',
+            data: [generateRandomData()],
+            tooltip: {
+                valueSuffix: ' %'
+            }
+        }]
+    });
+
+</script>
+
+</body>
+</html>
